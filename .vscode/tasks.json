@@ -1,0 +1,28 @@
+{
+
+			"version": "2.0.0",
+			"tasks": [
+				{
+					"label": "Load QDrant Database",
+					"type": "shell",
+					"command": "curl --header 'Content-Type: application/json' -X POST -d '{\"folder_id\": \"1QM-ANjyKC4Mlol5l0BoMpUznQ_t8ttwP\"}' http://127.0.0.1:5000/load",
+					"problemMatcher": [],
+					"dependsOn": [
+						"Run Qdrant Docker Container"
+					]
+				  },
+				  {
+					"label": "Test QDrant Query",
+					"type": "shell",
+					"command": "curl --header 'Content-Type: application/json' -X POST -d '{\"query\": \"Who is the author of the IT Management Simulation and what school are they associated with?\"}' http://127.0.0.1:5000/query",
+					"problemMatcher": [],
+			
+				  },
+			  {
+				"label": "Run Qdrant Docker Container",
+				"type": "shell",
+				"command": "docker ps -aq --filter \"name=gpt-qdrant\" | grep -q . && docker start gpt-qdrant || docker run -p 6333:6333 -d --name gpt-qdrant qdrant/qdrant",
+				"problemMatcher": []
+			  }
+			]
+		  }
