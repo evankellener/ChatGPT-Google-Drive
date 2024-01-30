@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Google Drive</title>
+</head>
+<body>
+    <h1>Welcome to an interactive Google Drive ChatGPT API</h1>
+
+    <h2>Please insert the id for you Goodgle drive folder/document(s).</h2>
+    <form action="/load-link" method="post">
+        <input type="text" id="googleDriveLink" name="googleDriveLink" placeholder="Please Enter Your GoogleDrive Link below">
+        <button type="submit">Load</button>
+    </form>
+
+    <h3>Please insert your question.</h3>
+    <form action="/ask-question" method="post">
+        <input type="text" id="question" name="question" placeholder="Please Enter Your Question below">
+        <button type="submit">Ask</button>
+    </form>
+
+    <div id="answer">
+        <!-- The answer will be displayed here -->
+    </div>
+</body>
+</html>

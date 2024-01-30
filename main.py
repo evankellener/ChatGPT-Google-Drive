@@ -1,6 +1,6 @@
 import json
 import webbrowser
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS
 from google.oauth2 import service_account
 from google.oauth2.credentials import Credentials
@@ -176,6 +176,10 @@ def authorize_google_drive():
     return authorization_url
 """
 
+@app.route('/')
+def hello():
+    return render_template('index.html')
+
 @app.route("/q",methods=['GET'])
 def query():
      data = request.args
@@ -223,5 +227,4 @@ def query_knowledge_base():
 
 
 if __name__ == "__main__":
-    app.run()
-
+    app.run(port=5000)
