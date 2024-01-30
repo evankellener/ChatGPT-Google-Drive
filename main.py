@@ -187,8 +187,13 @@ def query():
 
 @app.route("/load", methods=['POST'])
 def load_docs_from_drive():
+
+    # Using manual json post
     # curl --header 'Content-Type: application/json' -X POST -d '{"folder_id": "folder_id(1QM-AN....)"}' http://127.0.0.1:5000/load
-    data = request.json
+    # data = request.json
+
+    # Use request.form for HTML Form post
+    data = request.form
     folder_id = data.get('folder_id')
     if not folder_id:
         return {"msg": "A folder id must be provided in order to load google drive documents"}
