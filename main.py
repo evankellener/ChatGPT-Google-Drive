@@ -177,8 +177,8 @@ def authorize_google_drive():
 """
 
 @app.route('/')
-def hello():
-    return render_template('index.html')
+def index():
+    return render_template('index.html', answer='gpt_answer')
 
 @app.route("/q",methods=['GET'])
 def query():
