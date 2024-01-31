@@ -55,7 +55,7 @@ class QdrantVectorStore:
         for item in data:
             text = item.get("text")
 
-            text_vector = get_embedding(text, engine="text-embedding-ada-002")
+            text_vector = get_embedding(text, engine="text-embedding-3-small")
             text_id = str(uuid.uuid4())
             point = PointStruct(id=text_id, vector=text_vector, payload=item)
             points.append(point)
@@ -71,7 +71,8 @@ class QdrantVectorStore:
             print("Failed to insert data")
 
     def search(self, input_query: str, limit: int = 3):
-        input_vector = get_embedding(input_query, engine="text-embedding-ada-002")
+        input_vector = get_embedding(input_query, engine="text-embedding-3-small")
+        #text-embedding-ada-002
 #curl --header 'Content-Type: application/json' -X POST -d '{"query": query goes here("Who is the author of.... ?)"}' http://127.0.0.1:5000/query
         search_result = self.client.search(
             collection_name=self.collection_name,
@@ -90,7 +91,7 @@ class QdrantVectorStore:
 
 
     def search_with_filter(self, input_query: str, filter: dict, limit: int = 3):
-        input_vector = get_embedding(input_query, engine="text-embedding-ada-002")
+        input_vector = get_embedding(input_query, engine="text-embedding-3-small")
         filter_list = []
         for key, value in filter.items():
             filter_list.append(
