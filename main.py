@@ -16,6 +16,7 @@ import tiktoken
 from qdrant_test import QdrantVectorStore
 import openai
 from dotenv import load_dotenv,dotenv_values
+import os
 
 
 load_dotenv()  # take environment variables from .env.
@@ -178,23 +179,26 @@ def authorize_google_drive():
 
 @app.route('/')
 def index():
-    return render_template('index.html', answer='gpt_answer')
+    return render_template('index.html', answer=None)
 
 @app.route("/q",methods=['GET'])
 def query():
      data = request.args
      return data.get("param")
 
+@app.route("/run", methods=['GET'])
+def run_docker():
+    os.system("docker ps -aq --filter \"name=gpt-qdrant\" | grep -q . && docker start gpt-qdrant || docker run -p 6333:6333 -d --name gpt-qdrant qdrant/qdrant")
+    return render_template('index.html', running=True)
+
 @app.route("/load", methods=['POST'])
 def load_docs_from_drive():
 
     # Using manual json post
     # curl --header 'Content-Type: application/json' -X POST -d '{"folder_id": "folder_id(1QM-AN....)"}' http://127.0.0.1:5000/load
-    # data = request.json
-
-    # Use request.form for HTML Form post
+    #data = request.json
     data = request.form
-    folder_id = data.get('folder_id')
+    folder_id = data.get('googleDriveLink')
     if not folder_id:
         return {"msg": "A folder id must be provided in order to load google drive documents"}
 
@@ -211,12 +215,12 @@ def load_docs_from_drive():
     vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
     vector_store.upsert_data(chunks)
 
-    return "docs loaded"
+    return render_template('index.html', googleDriveLink=True)
 
 
 @app.route("/query", methods=['POST'])
 def query_knowledge_base():
-    data = request.json
+    data = request.form
     query = data.get('query')
     vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
     results = vector_store.search(query)
@@ -228,8 +232,9 @@ def query_knowledge_base():
 
     llm_answer = chatgpt_answer(query, context)
     print(llm_answer)
-    return llm_answer
+    llm_answer = str(llm_answer)
+    return render_template('index.html', answer=llm_answer)
 
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(port=5001)

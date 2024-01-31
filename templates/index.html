@@ -9,26 +9,41 @@
 <body>
     <h1>Welcome to an interactive Google Drive ChatGPT API</h1>
 
+    <form action="/run" method="get">
+        <button type="submit">Run Docker</button>
+    </form>
+
+    {% if running %}
+        <h3>Docker Container Running</h3>
+    {% endif %}
+
     <h2>Please insert the id for you Goodgle drive folder/document(s).</h2>
     <form action="/load" method="post">
         <input type="text" id="googleDriveLink" name="googleDriveLink" placeholder="Please Enter Your GoogleDrive Link below">
         <button type="submit">Load</button>
     </form>
 
+    {% if googleDriveLink %}
+        <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
+    {% endif %}
+
     <h3>Please insert your question.</h3>
-    <form action="/ask-question" method="post">
-        <input type="text" id="question" name="question" placeholder="Please Enter Your Question below">
-        <button type="submit">Ask</button>
+    <form action="/query" method="post">
+        <textarea name="query" placeholder="Please insert your question."></textarea>
+        <button type="submit">Submit</button>
     </form>
+    
+    <!--<input type="text" id="question" name="question" placeholder="Please Enter Your Question below">...-->)
 
     <div id="answer">
-        <table border="1">
+        <table>
             <tr>
-                <td>{{ answer}}</td>
+                <th>Answer</th>
             </tr>
-           
-        </table>
-        <!-- The answer will be displayed here -->
+            <tr>
+                <td>{{ answer | safe }}</td>
+            </tr>
     </div>
+    
 </body>
 </html>
