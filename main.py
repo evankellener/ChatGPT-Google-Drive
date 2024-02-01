@@ -22,7 +22,8 @@ import os
 load_dotenv()  # take environment variables from .env.
 config = dotenv_values(".env")
 openai.api_key = config.get("OPENAI_API_KEY")
-
+client_secrets = json.loads(config.get("GOOGLE_OAUTH_CLIENT"))
+port =config.get("PORT")
 SCOPES = ['https://www.googleapis.com/auth/drive']
 google_creds = json.loads(config.get("GOOGLE_CREDS"))
 app = Flask(__name__)
@@ -139,7 +140,6 @@ def get_documents_from_folder(service, folder_id):
 
     return documents
 
-"""
 @app.route("/oauth/redirect", methods=['POST', 'GET'])
 def redirect_callback():
     authorization_response = request.url
@@ -151,7 +151,7 @@ def redirect_callback():
     flow = InstalledAppFlow.from_client_config(
         client_secrets,
         SCOPES,
-        redirect_uri="http://127.0.0.1:5000/oauth/redirect"
+        redirect_uri="http://127.0.0.1:{}/oauth/redirect".format(port)
     )
 
     flow.fetch_token(code=auth_code)
@@ -169,13 +169,12 @@ def authorize_google_drive():
     flow = InstalledAppFlow.from_client_config(
         client_secrets,
         SCOPES,
-        redirect_uri="http://127.0.0.1:5000/oauth/redirect"
+        redirect_uri="http://127.0.0.1:{}/oauth/redirect".format(port)
     )
 
     authorization_url, state = flow.authorization_url(prompt='consent')
     webbrowser.open(authorization_url)
     return authorization_url
-"""
 
 @app.route('/')
 def index():
@@ -202,8 +201,24 @@ def load_docs_from_drive():
     if not folder_id:
         return {"msg": "A folder id must be provided in order to load google drive documents"}
 
-    storage_credentials = service_account.Credentials.from_service_account_info(google_creds)    
-    service = build('drive', 'v3', credentials=storage_credentials)
+    with open('gdrive_credentials.txt') as f:
+        line = f.readline()
+    credentials_json = json.loads(line)
+
+    creds = Credentials.from_authorized_user_info(
+        credentials_json
+    )
+
+    if not creds.valid and creds.refresh_token:
+        creds.refresh(Request())
+        credentials_string = creds.to_json()
+        with open("gdrive_credentials.txt", "w") as text_file:
+            text_file.write(credentials_string)
+
+
+#    storage_credentials = service_account.Credentials.from_service_account_info(google_creds)    
+           
+    service = build('drive', 'v3', credentials=creds)
 #    folder_id = get_folder_id_from_url(google_drive_folder_path)
     documents = get_documents_from_folder(service, folder_id)
 
@@ -237,4 +252,4 @@ def query_knowledge_base():
 
 
 if __name__ == "__main__":
-    app.run(port=5001)
+    app.run(port=port)
