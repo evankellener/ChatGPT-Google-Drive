@@ -7,42 +7,46 @@
     <title>ChatGPT Google Drive</title>
 </head>
 <body>
-    <h1>Welcome to an interactive Google Drive ChatGPT API</h1>
+    <div class = "container">
+        <h1>Welcome to an interactive Google Drive ChatGPT API</h1>
 
-    <form action="/run" method="get">
-        <button type="submit">Run Docker</button>
-    </form>
+        <form action="/run" method="get">
+            <button type="submit">Run Docker</button>
+        </form>
 
-    {% if running %}
-        <h3>Docker Container Running</h3>
-    {% endif %}
+        {% if running %}
+            <h3>Docker Container Running</h3>
+        {% endif %}
 
-    <h2>Please insert the id for you Goodgle drive folder/document(s).</h2>
-    <form action="/load" method="post">
-        <input type="text" id="googleDriveLink" name="googleDriveLink" placeholder="Please Enter Your GoogleDrive Link below">
-        <button type="submit">Load</button>
-    </form>
+        <h2>Please insert the id for you Goodgle drive folder/document(s).</h2>
+        <form action="/load" method="post">
+            <input type="text" id="googleDriveLink" name="googleDriveLink" placeholder="Please Enter Your GoogleDrive Link below">
+            <button type="submit">Load</button>
+        </form>
 
-    {% if googleDriveLink %}
-        <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
-    {% endif %}
+        {% if googleDriveLink %}
+            <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
+        {% endif %}
 
-    <h3>Please insert your question.</h3>
-    <form action="/query" method="post">
-        <textarea name="query" placeholder="Please insert your question."></textarea>
-        <button type="submit">Submit</button>
-    </form>
-    
-    <!--<input type="text" id="question" name="question" placeholder="Please Enter Your Question below">...-->
+        <h3>Please insert your question.</h3>
+        <form action="/query" method="post">
+            <textarea name="query" placeholder="Please insert your question."></textarea>
+            <button type="submit">Submit</button>
+        </form>
+        
+        <!--<input type="text" id="question" name="question" placeholder="Please Enter Your Question below">...-->
 
-    <div id="answer">
-        <table>
-            <tr>
-                <th>Answer</th>
-            </tr>
-            <tr>
-                <td>{{ answer | safe }}</td>
-            </tr>
+        <div id="answer">
+            <table>
+                <tr>
+                    <th>Answer</th>
+                </tr>
+                {%if answer not in ["", None]%}
+                <tr>
+                    <td>{{ answer | safe }}</td>
+                </tr>
+                {%endif%}
+        </div>
     </div>
     
 </body>

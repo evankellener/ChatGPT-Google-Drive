@@ -160,7 +160,7 @@ def redirect_callback():
     with open("gdrive_credentials.txt", "w") as text_file:
         text_file.write(credentials_string)
 
-    return "Google Drive Authorization Successful!"
+    return render_template('index.html', answer=None)
 
 
 @app.route("/authorize", methods=['GET'])
@@ -178,7 +178,12 @@ def authorize_google_drive():
 
 @app.route('/')
 def index():
-    return render_template('index.html', answer=None)
+    path = './gdrive_credentials.txt'
+    check_file = os.path.isfile(path)
+    if check_file:
+        return render_template('index.html', answer=None)
+    else:
+        return render_template('home.html')
 
 @app.route("/q",methods=['GET'])
 def query():
