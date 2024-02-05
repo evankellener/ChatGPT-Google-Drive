@@ -24,6 +24,13 @@
             <button type="submit">Load</button>
         </form>
 
+        <div class="loader" style="display: none;"></div>
+
+        <script>
+            document.querySelector('form[action="/load"]').addEventListener('submit', function() {
+                document.querySelector('.loader').style.display = 'block'; // Show loader
+            });
+            </script>
         {% if googleDriveLink %}
             <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
         {% endif %}
