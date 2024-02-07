@@ -9,6 +9,7 @@ from typing import List
 import openai
 from openai.embeddings_utils import get_embedding
 from dotenv import load_dotenv, dotenv_values
+import tiktoken
 
 
 load_dotenv()  # take environment variables from .env.
@@ -20,11 +21,11 @@ openai.api_key = config.get("OPENAI_API_KEY")
 class QdrantVectorStore:
 
     def __init__(self,
-                 host: str = "localhost",
-                 port: int = 6333,
+                 host: str = config.get("QD_HOST"),
+                 port: int = config.get("QD_PORT"),
                  #db_path: str = "/Users/het/qdrant/qdrant_storage",
                  collection_name: str = config.get("COLLECTION"),
-                 vector_size: int = 1536,
+                 vector_size: int = config.get("VECTOR_SIZE"),
                  vector_distance=Distance.COSINE
                  ):
 
@@ -55,7 +56,7 @@ class QdrantVectorStore:
         for item in data:
             text = item.get("text")
 
-            text_vector = get_embedding(text, engine="text-embedding-3-small")
+            text_vector = get_embedding(text, engine=config.get("EMBEDDING"))
             text_id = str(uuid.uuid4())
             point = PointStruct(id=text_id, vector=text_vector, payload=item)
             points.append(point)
@@ -71,7 +72,7 @@ class QdrantVectorStore:
             print("Failed to insert data")
 
     def search(self, input_query: str, limit: int = 3):
-        input_vector = get_embedding(input_query, engine="text-embedding-3-small")
+        input_vector = get_embedding(input_query, engine=config.get("EMBEDDING"))
         #text-embedding-ada-002
 #curl --header 'Content-Type: application/json' -X POST -d '{"query": query goes here("Who is the author of.... ?)"}' http://127.0.0.1:5000/query
         search_result = self.client.search(
@@ -91,7 +92,7 @@ class QdrantVectorStore:
 
 
     def search_with_filter(self, input_query: str, filter: dict, limit: int = 3):
-        input_vector = get_embedding(input_query, engine="text-embedding-3-small")
+        input_vector = get_embedding(input_query, engine=config.get("EMBEDDING"))
         filter_list = []
         for key, value in filter.items():
             filter_list.append(
@@ -131,4 +132,44 @@ class QdrantVectorStore:
 
     def get_collection(self, collection_name: str):
         return self.client.get_collection(collection_name=collection_name)
+    
+    def docs_to_chunks(self, documents):
+        chunks = []
+        for doc in documents:
+            document_chunks = self.chunk_tokens(doc)
+            chunks.extend(document_chunks)
+
+        return chunks
+    
+    def chunk_tokens(self, document: str, token_limit: int = 200):
+        tokenizer = tiktoken.get_encoding(
+            "cl100k_base"
+        )
+
+        chunks = []
+        tokens = tokenizer.encode(document, disallowed_special=())
+
+        while tokens:
+            chunk = tokens[:token_limit]
+            chunk_text = tokenizer.decode(chunk)
+            last_punctuation = max(
+                chunk_text.rfind("."),
+                chunk_text.rfind("?"),
+                chunk_text.rfind("!"),
+                chunk_text.rfind("\n"),
+            )
+            if last_punctuation != -1:
+                chunk_text = chunk_text[: last_punctuation + 1]
+            cleaned_text = chunk_text.replace("\n", " ").strip()
+            # cleaned_text = re.sub(r'\W+', '', cleaned_text)
+
+            if cleaned_text and (not cleaned_text.isspace()):
+                chunks.append(
+                    {"text": cleaned_text}
+                )
+
+            tokens = tokens[len(tokenizer.encode(chunk_text, disallowed_special=())):]
+
+        return chunks
+
 

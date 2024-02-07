@@ -12,11 +12,11 @@ from urllib.parse import parse_qs
 from collections import deque
 import io
 from PyPDF2 import PdfReader
-import tiktoken
 from qdrant_test import QdrantVectorStore
 import openai
 from dotenv import load_dotenv,dotenv_values
 import os
+from gdrive_downloader import gDriveDownlader
 
 
 load_dotenv()  # take environment variables from .env.
@@ -24,6 +24,7 @@ config = dotenv_values(".env")
 openai.api_key = config.get("OPENAI_API_KEY")
 client_secrets = json.loads(config.get("GOOGLE_OAUTH_CLIENT"))
 port =config.get("PORT")
+host = config.get("MAIN_HOST")
 SCOPES = ['https://www.googleapis.com/auth/drive']
 google_creds = json.loads(config.get("GOOGLE_CREDS"))
 app = Flask(__name__)
@@ -55,38 +56,6 @@ def extract_pdf_text(pdf_file):
     for page_num in range(len(reader.pages)):
         text += reader.pages[page_num].extract_text()
     return text
-
-
-def chunk_tokens(document: str, token_limit: int = 200):
-    tokenizer = tiktoken.get_encoding(
-        "cl100k_base"
-    )
-
-    chunks = []
-    tokens = tokenizer.encode(document, disallowed_special=())
-
-    while tokens:
-        chunk = tokens[:token_limit]
-        chunk_text = tokenizer.decode(chunk)
-        last_punctuation = max(
-            chunk_text.rfind("."),
-            chunk_text.rfind("?"),
-            chunk_text.rfind("!"),
-            chunk_text.rfind("\n"),
-        )
-        if last_punctuation != -1:
-            chunk_text = chunk_text[: last_punctuation + 1]
-        cleaned_text = chunk_text.replace("\n", " ").strip()
-        # cleaned_text = re.sub(r'\W+', '', cleaned_text)
-
-        if cleaned_text and (not cleaned_text.isspace()):
-            chunks.append(
-                {"text": cleaned_text}
-            )
-
-        tokens = tokens[len(tokenizer.encode(chunk_text, disallowed_special=())):]
-
-    return chunks
 
 
 def chatgpt_answer(question, context):
@@ -123,7 +92,7 @@ def get_documents_from_folder(service, folder_id):
 
             if mime_type == "application/vnd.google-apps.folder":
                 folders_to_process.append(item["id"])
-            elif mime_type in ["application/vnd.google-apps.document", "application/pdf"]:
+            elif mime_type in ["application/vnd.google-apps.document", "application/pdf", "application/vnd.google-apps.presentation", "application/vnd.google-apps.spreadsheet"]:
                 # Retrieve the full metadata for the file
                 file_metadata = service.files().get(fileId=item["id"]).execute()
                 mime_type = file_metadata.get("mimeType", "")
@@ -134,15 +103,28 @@ def get_documents_from_folder(service, folder_id):
                 elif mime_type == "application/pdf":
                     pdf_file = download_pdf(service, item["id"])
                     content = extract_pdf_text(pdf_file)
+                elif mime_type == "application/vnd.google-apps.spreadsheet":
+                    sheet = service.files().export(fileId=item["id"], mimeType="text/csv").execute()
+                    content= sheet.decode("utf-8")
+                elif mime_type == "application/vnd.google-apps.presentation":
+                    pp = service.files().export(fileId=item["id"], mimeType="text/plain").execute()
+                    content = pp.decode("utf-8")
 
                 if len(content) > 0:
                     documents.append(content)
+            else:
+                print("File type : {} is invalid from file {}. Restricted only to pdf, doc, spreadsheet, and presentation".format(item.get("mimeType", ""), item.get("name")))
+                
 
     return documents
 
 @app.route("/oauth/redirect", methods=['POST', 'GET'])
 def redirect_callback():
+    
     authorization_response = request.url
+
+    downloader = gDriveDownlader(authorization_response=authorization_response)
+    """
     print("authorization response: ", authorization_response)
     parsed_url = urlparse(authorization_response)
     auth_code = parse_qs(parsed_url.query)['code'][0]
@@ -151,7 +133,7 @@ def redirect_callback():
     flow = InstalledAppFlow.from_client_config(
         client_secrets,
         SCOPES,
-        redirect_uri="http://127.0.0.1:{}/oauth/redirect".format(port)
+        redirect_uri="http://{}:{}/oauth/redirect".format(host, port)
     )
 
     flow.fetch_token(code=auth_code)
@@ -159,6 +141,7 @@ def redirect_callback():
     credentials_string = credentials.to_json()
     with open("gdrive_credentials.txt", "w") as text_file:
         text_file.write(credentials_string)
+    """
 
     return render_template('index.html', answer=None)
 
@@ -169,7 +152,7 @@ def authorize_google_drive():
     flow = InstalledAppFlow.from_client_config(
         client_secrets,
         SCOPES,
-        redirect_uri="http://127.0.0.1:{}/oauth/redirect".format(port)
+        redirect_uri="http://{}:{}/oauth/redirect".format(host, port)
     )
 
     authorization_url, state = flow.authorization_url(prompt='consent')
@@ -227,12 +210,8 @@ def load_docs_from_drive():
 #    folder_id = get_folder_id_from_url(google_drive_folder_path)
     documents = get_documents_from_folder(service, folder_id)
 
-    chunks = []
-    for doc in documents:
-        document_chunks = chunk_tokens(doc)
-        chunks.extend(document_chunks)
-
     vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
+    chunks = vector_store.docs_to_chunks(documents)
     vector_store.upsert_data(chunks)
 
     return render_template('index.html', googleDriveLink=True)
@@ -253,7 +232,7 @@ def query_knowledge_base():
     llm_answer = chatgpt_answer(query, context)
     print(llm_answer)
     llm_answer = str(llm_answer)
-    return render_template('index.html', answer=llm_answer)
+    return render_template('index.html', answer=llm_answer, context=context)
 
 
 if __name__ == "__main__":

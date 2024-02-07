@@ -53,6 +53,14 @@
                     <td>{{ answer | safe }}</td>
                 </tr>
                 {%endif%}
+                <tr>
+                    <th>Context from Vector Database, queried into ChatGPT.</th>
+                </tr>
+                {%if context not in ["", None]%}
+                <tr>
+                    <td>{{ context | safe }}</td>
+                </tr>
+                {%endif%}
         </div>
     </div>
     
