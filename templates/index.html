@@ -26,6 +26,8 @@
 
         <div class="loader" style="display: none;"></div>
 
+
+
         <script>
             document.querySelector('form[action="/load"]').addEventListener('submit', function() {
                 document.querySelector('.loader').style.display = 'block'; // Show loader
@@ -35,6 +37,32 @@
             <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
         {% endif %}
 
+      
+      
+        <div id="tree">
+            <ul class="tree">
+                <li>
+                  <details open>
+                    <summary>Results</summary>
+                    <ul>
+                    {% if context_valid %}
+                    {% for item in context %}
+                      <li>
+                        <details>
+                          <summary>{{ item.id|e }}</summary>
+                          <ul>
+                            <li>{{ item.text|e }}</li>
+                          </ul>
+                        </details>
+                      </li>
+                    {% endfor %}
+                    {% endif %}
+                    </ul>
+                  </details>
+                </li>
+              </ul>
+        </div>
+      
         <h3>Please insert your question.</h3>
         <form action="/query" method="post">
             <textarea name="query" placeholder="Please insert your question."></textarea>
@@ -62,6 +90,7 @@
                 </tr>
                 {%endif%}
         </div>
+        
     </div>
     
 </body>

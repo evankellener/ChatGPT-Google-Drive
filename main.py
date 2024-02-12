@@ -232,7 +232,7 @@ def query_knowledge_base():
     llm_answer = chatgpt_answer(query, context)
     print(llm_answer)
     llm_answer = str(llm_answer)
-    return render_template('index.html', answer=llm_answer, context=context)
+    return render_template('index.html', answer=llm_answer, context=results, context_valid=True)
 
 
 if __name__ == "__main__":
