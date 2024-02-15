@@ -92,7 +92,7 @@ created key […..] of type [json] as [service_account.json] for [gdrive-gpt-ser
 ```
 
 
-and looking at the file,  you should see something like this
+and looking at the file *service_account.json*,  you should see something like this
 
 ```cat service_account.json 
 {
