@@ -1,4 +1,4 @@
-# chatgpt-gdrive-article
+# chatgpt-Google-Drive
 
 
 ## Setting up Google Drive access
