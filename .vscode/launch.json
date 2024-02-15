@@ -6,10 +6,10 @@
     "configurations": [
        
         {
-            "name": "Python: Current File",
+            "name": "Python: Main.py",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "serverReadyAction":{

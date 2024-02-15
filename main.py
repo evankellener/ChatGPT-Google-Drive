@@ -7,12 +7,12 @@ from dotenv import load_dotenv,dotenv_values
 import os
 from gdrive_downloader import gDriveDownloader
 
-
 load_dotenv()  # take environment variables from .env.
 config = dotenv_values(".env")
 openai.api_key = config.get("OPENAI_API_KEY")
 port =config.get("PORT")
 host = config.get("MAIN_HOST")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -38,7 +38,7 @@ def chatgpt_answer(question, context):
     return res['choices'][0]['message']['content']
 
 
-
+"""
 @app.route("/oauth/redirect", methods=['POST', 'GET'])
 def redirect_callback():
     
@@ -56,14 +56,16 @@ def authorize_google_drive():
     webbrowser.open(authorization_url)
     return authorization_url
 
+"""
+
 @app.route('/')
 def index():
-    path = './gdrive_credentials.txt'
-    check_file = os.path.isfile(path)
-    if check_file:
+    #path = './gdrive_credentials.txt'
+    #check_file = os.path.isfile(path)
+    #if check_file:
         return render_template('index.html', answer=None)
-    else:
-        return render_template('home.html')
+    #else:
+    #    return render_template('home.html')
 
 @app.route("/q",methods=['GET'])
 def query():
@@ -74,8 +76,6 @@ def query():
 @app.route("/load", methods=['POST'])
 def load_docs_from_drive():
     # Using manual json post
-    # curl --header 'Content-Type: application/json' -X POST -d '{"folder_id": "folder_id(1QM-AN....)"}' http://127.0.0.1:5000/load
-    #data = request.json
     data = request.form
     folder_id = data.get('googleDriveLink')
     if not folder_id:
@@ -89,6 +89,7 @@ def load_docs_from_drive():
     vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
     chunks = vector_store.docs_to_chunks(documents)
     vector_store.upsert_data(chunks)
+
     return render_template('index.html', googleDriveLink=True)
 
 

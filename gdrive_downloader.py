@@ -24,15 +24,15 @@ class gDriveDownloader:
     def __init__(self, creds_path: str = './gdrive_credentials.txt'):
         load_dotenv()  # take environment variables from .env.
         config = dotenv_values(".env")
-        self.client_secrets = json.loads(config.get("GOOGLE_OAUTH_CLIENT"))
+        #self.client_secrets = json.loads(config.get("GOOGLE_OAUTH_CLIENT"))
         self.port =config.get("PORT")
         self.host = config.get("MAIN_HOST")
-        self.SCOPES = ['https://www.googleapis.com/auth/drive']
-        self.google_creds = json.loads(config.get("GOOGLE_CREDS"))
-        self.creds_path = creds_path
-
+        #self.SCOPES = ['https://www.googleapis.com/auth/drive']
+        self.google_creds_file = config.get("GOOGLE_CREDS_FILE")
+        #self.creds_path = creds_path
 
     def oauth_redirect(self,authorization_response: str = ""):
+        """
         print("authorization response: ", authorization_response)
         parsed_url = urlparse(authorization_response)
         auth_code = parse_qs(parsed_url.query)['code'][0]
@@ -48,9 +48,10 @@ class gDriveDownloader:
         credentials_string = credentials.to_json()
         with open(self.creds_path, "w") as text_file:
             text_file.write(credentials_string)
+        """ 
 
     def authorize(self):
-
+        """ 
         flow = InstalledAppFlow.from_client_config(
             self.client_secrets,
             self.SCOPES,
@@ -58,9 +59,10 @@ class gDriveDownloader:
         )
         authorization_url, state = flow.authorization_url(prompt='consent')
         return authorization_url
-
+        """
+        
     def initialize_service(self):
-        creds = None
+        """
         if os.path.exists(self.creds_path):
             creds = Credentials.from_authorized_user_file(self.creds_path)
             if not creds.valid and creds.refresh_token:
@@ -68,7 +70,8 @@ class gDriveDownloader:
                 credentials_string = creds.to_json()
                 with open("gdrive_credentials.txt", "w") as text_file:
                     text_file.write(credentials_string)
-
+        """
+        creds = service_account.Credentials.from_service_account_file(self.google_creds_file)      
         self.service = build('drive', 'v3', credentials=creds)
     
 
