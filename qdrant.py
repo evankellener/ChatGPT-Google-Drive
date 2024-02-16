@@ -1,8 +1,7 @@
 import uuid
-
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
-from qdrant_client.http.models import PointStruct, CollectionStatus, UpdateStatus
+from qdrant_client.http.models import PointStruct, UpdateStatus
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 from qdrant_client.http import models
 from typing import List
@@ -71,7 +70,7 @@ class QdrantVectorStore:
         else:
             print("Failed to insert data")
 
-    def search(self, input_query: str, limit: int = 3):
+    def search(self, input_query: str, limit: int = config.get("QD_RESULTS")):
         input_vector = get_embedding(input_query, engine=config.get("EMBEDDING"))
         #text-embedding-ada-002
 #curl --header 'Content-Type: application/json' -X POST -d '{"query": query goes here("Who is the author of.... ?)"}' http://127.0.0.1:5000/query
@@ -161,7 +160,6 @@ class QdrantVectorStore:
             if last_punctuation != -1:
                 chunk_text = chunk_text[: last_punctuation + 1]
             cleaned_text = chunk_text.replace("\n", " ").strip()
-            # cleaned_text = re.sub(r'\W+', '', cleaned_text)
 
             if cleaned_text and (not cleaned_text.isspace()):
                 chunks.append(

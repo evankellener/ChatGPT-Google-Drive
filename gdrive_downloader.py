@@ -1,76 +1,23 @@
-import json
-import webbrowser
-from flask import Flask, request, render_template
-from flask_cors import CORS
 from google.oauth2 import service_account
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from urllib.parse import urlparse
-from urllib.parse import parse_qs
 from collections import deque
 import io
 from PyPDF2 import PdfReader
-from qdrant import QdrantVectorStore
-import openai
 from dotenv import load_dotenv,dotenv_values
-import os
 
 
 class gDriveDownloader:
 
     service = None
-    def __init__(self, creds_path: str = './gdrive_credentials.txt'):
+    def __init__(self):
         load_dotenv()  # take environment variables from .env.
         config = dotenv_values(".env")
-        #self.client_secrets = json.loads(config.get("GOOGLE_OAUTH_CLIENT"))
         self.port =config.get("PORT")
         self.host = config.get("MAIN_HOST")
-        #self.SCOPES = ['https://www.googleapis.com/auth/drive']
         self.google_creds_file = config.get("GOOGLE_CREDS_FILE")
-        #self.creds_path = creds_path
 
-    def oauth_redirect(self,authorization_response: str = ""):
-        """
-        print("authorization response: ", authorization_response)
-        parsed_url = urlparse(authorization_response)
-        auth_code = parse_qs(parsed_url.query)['code'][0]
-        print("auth code: ", auth_code)
-        flow = InstalledAppFlow.from_client_config(
-        self.client_secrets,
-        self.SCOPES,
-        redirect_uri="http://{}:{}/oauth/redirect".format(self.host, self.port)
-        )
-
-        flow.fetch_token(code=auth_code)
-        credentials = flow.credentials
-        credentials_string = credentials.to_json()
-        with open(self.creds_path, "w") as text_file:
-            text_file.write(credentials_string)
-        """ 
-
-    def authorize(self):
-        """ 
-        flow = InstalledAppFlow.from_client_config(
-            self.client_secrets,
-            self.SCOPES,
-            redirect_uri="http://{}:{}/oauth/redirect".format(self.host, self.port)
-        )
-        authorization_url, state = flow.authorization_url(prompt='consent')
-        return authorization_url
-        """
-        
+    
     def initialize_service(self):
-        """
-        if os.path.exists(self.creds_path):
-            creds = Credentials.from_authorized_user_file(self.creds_path)
-            if not creds.valid and creds.refresh_token:
-                creds.refresh(Request())
-                credentials_string = creds.to_json()
-                with open("gdrive_credentials.txt", "w") as text_file:
-                    text_file.write(credentials_string)
-        """
         creds = service_account.Credentials.from_service_account_file(self.google_creds_file)      
         self.service = build('drive', 'v3', credentials=creds)
     

@@ -4,7 +4,7 @@
 ## Setting up Google Drive access
 The application requires a service account to be set up for Google to access the Google Drive resources. The instructions below assume you have access to the Google gcloud cli tools. Instructions on how to install are located https://cloud.google.com/sdk/docs/install
 
-Once gcloud is installed and accessible, follow the sequence of steps below to set up the service account.
+Once gcloud is installed and accessible, make sure to start a new terminal, otherwise gcloud may not be in the path. Follow the sequence of steps below to set up the service account.
 
 
 
@@ -82,7 +82,7 @@ version: 1
 The last step is to generate a json key file for the service acount which will be used by the application. The default file name is service_account.json
 
 ```console
-gcloud iam service-accounts keys create service_account.json \ --iam-account='gdrive-gpt-service-account@gdrive-gpt-access.iam.gserviceaccount.com'
+gcloud iam service-accounts keys create service_account.json --iam-account='gdrive-gpt-service-account@gdrive-gpt-access.iam.gserviceaccount.com'
 ```
 
 Output
@@ -114,6 +114,15 @@ You'll want to copy service_account.json to the application root, or adjust the 
 
 Now your application is set up to connect to Google Drive.
 
+If you run into any issues on creating the project and want to start over. Run the following command. Note it may take google a bit to release the project name. You can always start a new project with it's own project name *gdrive-gpt-access1* and not have to wait for the project name to be released.
+
+```console
+gcloud projects delete gdrive-gpt-access
+```
+
 ## Setting up Qdrant Vector Database with Docker
-Run this command to start up qdrant container with default ports
+Run this command to start up a qdrant container with default ports. It will first check if it's running already, and if not, it will start it up. 
+
+```console
+
 docker ps -aq --filter \"name=gpt-qdrant\" | grep -q . && docker start gpt-qdrant || docker run -p 6333:6333 -d --name gpt-qdrant qdrant/qdrant

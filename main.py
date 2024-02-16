@@ -1,10 +1,8 @@
-import webbrowser
 from flask import Flask, request, render_template
 from flask_cors import CORS
 from qdrant import QdrantVectorStore
 import openai
 from dotenv import load_dotenv,dotenv_values
-import os
 from gdrive_downloader import gDriveDownloader
 
 load_dotenv()  # take environment variables from .env.
@@ -37,35 +35,28 @@ def chatgpt_answer(question, context):
     )
     return res['choices'][0]['message']['content']
 
-
-"""
-@app.route("/oauth/redirect", methods=['POST', 'GET'])
-def redirect_callback():
-    
-    authorization_response = request.url
-    print("authorization response: ", authorization_response)
-    downloader = gDriveDownloader()
-    downloader.oauth_redirect(authorization_response)
-    return render_template('index.html', answer=None)
-
-
-@app.route("/authorize", methods=['GET'])
-def authorize_google_drive():
-    downloader = gDriveDownloader()
-    authorization_url = downloader.authorize()
-    webbrowser.open(authorization_url)
-    return authorization_url
-
-"""
-
 @app.route('/')
 def index():
-    #path = './gdrive_credentials.txt'
-    #check_file = os.path.isfile(path)
-    #if check_file:
-        return render_template('index.html', answer=None)
-    #else:
-    #    return render_template('home.html')
+    #checks  
+    try: 
+        openai.api_key = config.get("OPENAI_API_KEY")
+    except:
+        return render_template('home.html', openai_cred=False)
+    #openai_ke(exists)
+    try:
+        valid_cred = config.get("GOOGLE_CREDS_FILE")
+    except:
+        return render_template('home.html', google_cred=False)
+    #google_creds_file(check to see creds points to a valid folder)
+    try:
+        downloader = gDriveDownloader()
+        downloader.initialize_service()
+        vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
+    except:
+        return render_template('home.html', qd_server=False)
+    #qd server running(declare QD class and see if it errors)
+    #if checks invalid send to home.html
+    return render_template('index.html', answer=None)
 
 @app.route("/q",methods=['GET'])
 def query():

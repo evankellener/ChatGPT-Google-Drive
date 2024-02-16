@@ -20,7 +20,7 @@
         {% endif %}
         -->
 
-        <h2>Please insert the id for you Goodgle drive folder/document(s).</h2>
+        <h2>Please insert the id for you Google drive folder/document(s).</h2>
         <form action="/load" method="post">
             <input type="text" id="googleDriveLink" name="googleDriveLink" placeholder="Please Enter Your GoogleDrive Link below">
             <button type="submit">Load</button>
@@ -36,34 +36,8 @@
             });
             </script>
         {% if googleDriveLink %}
-            <h3>Google Drive Link: {{ googleDriveLink }} was uploaded</h3>
+            <h3>Google Drive Link was uploaded</h3>
         {% endif %}
-
-      
-      
-        <div id="tree">
-            <ul class="tree">
-                <li>
-                  <details open>
-                    <summary>Results</summary>
-                    <ul>
-                    {% if context_valid %}
-                    {% for item in context %}
-                      <li>
-                        <details>
-                          <summary>{{ item.id|e }}</summary>
-                          <ul>
-                            <li>{{ item.text|e }}</li>
-                          </ul>
-                        </details>
-                      </li>
-                    {% endfor %}
-                    {% endif %}
-                    </ul>
-                  </details>
-                </li>
-              </ul>
-        </div>
       
         <h3>Please insert your question.</h3>
         <form action="/query" method="post">
@@ -83,16 +57,32 @@
                     <td>{{ answer | safe }}</td>
                 </tr>
                 {%endif%}
-                <tr>
-                    <th>Context from Vector Database, queried into ChatGPT.</th>
-                </tr>
-                {%if context not in ["", None]%}
-                <tr>
-                    <td>{{ context | safe }}</td>
-                </tr>
-                {%endif%}
+                
         </div>
         
+    </div>
+    <div id="tree">
+        <ul class="tree">
+            <li>
+              <details open>
+                <summary>QDrant Results</summary>
+                <ul>
+                {% if context_valid %}
+                {% for item in context %}
+                  <li>
+                    <details>
+                      <summary>{{ item.id|e }}</summary>
+                      <ul>
+                        <li>{{ item.text|e }}</li>
+                      </ul>
+                    </details>
+                  </li>
+                {% endfor %}
+                {% endif %}
+                </ul>
+              </details>
+            </li>
+          </ul>
     </div>
     
 </body>
