@@ -11,14 +11,21 @@
     <h2>OpenAI API</h2>
     {% if not openai_api %}
         <h3>OpenAI API is not working properly, please check your credentials</h3>
+    {% else %}
+        <h3>Found OpenAI Key!</h3>
     {% endif %}
     <h2>Google Drive API</h2>
     {% if not google_drive_api %}
         <h3>Google Drive API is not working properly, please check that your GOOGLE_CREDS_FILE in your .env file points to valid credentials.</h3>
+        {% else %}
+        <h3>Found Account Service json file!</h3>
     {% endif %}
     <h2>QDrant Sever</h2>
     {% if not qdrant_server %}
         <h3>QDrant Server is not working properly, please make sure your database is working on the correct port setup in the .env file</h3>
+        {% else %}
+        <h3>QDrant is running</h3>
     {% endif %}
 </body>
 </html>
+

@@ -37,26 +37,36 @@ def chatgpt_answer(question, context):
 
 @app.route('/')
 def index():
+    #Initialize
+    google_cred=True
+    openai_cred=True
+    qdrant_server=True
+
     #checks  
-    try: 
-        openai.api_key = config.get("OPENAI_API_KEY")
-    except:
-        return render_template('home.html', openai_cred=False)
+    
+    #Test if there's a value assigned
+    openai.api_key = config.get("OPENAI_API_KEY")
+    if openai.api_key is None:
+        openai_cred=False
     #openai_ke(exists)
     try:
+        # Should check for the existence of the file (e.g. use an OS check file on this value)
         valid_cred = config.get("GOOGLE_CREDS_FILE")
     except:
-        return render_template('home.html', google_cred=False)
+       google_cred=False
     #google_creds_file(check to see creds points to a valid folder)
     try:
         downloader = gDriveDownloader()
         downloader.initialize_service()
         vector_store = QdrantVectorStore(collection_name=config.get("COLLECTION"))
     except:
-        return render_template('home.html', qd_server=False)
+        qdrant_server=False
     #qd server running(declare QD class and see if it errors)
     #if checks invalid send to home.html
-    return render_template('index.html', answer=None)
+    if not qdrant_server or not openai_cred or  not google_cred:
+       return render_template('home.html', answer=None, openai_api=openai_cred,google_drive_api=google_cred,qdrant_server=qdrant_server)
+    else:
+        return render_template('index.html', answer=None)
 
 @app.route("/q",methods=['GET'])
 def query():
