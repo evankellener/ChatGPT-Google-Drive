@@ -3,3 +3,6 @@
 __pycache__
 gdrive_credentials.txt
 service_account.json
+.gptdrive
+.gptdrive1
+.DS_Store

@@ -1,5 +1,37 @@
 # chatgpt-Google-Drive
 
+## Description
+This is a simple application that uses the OpenAI GPT-3 model to generate text based on the contents of a Google Drive folder. The application is written in Python and uses the FastAPI framework to provide a RESTful API. The application uses the Google Drive API to access the contents of a Google Drive folder, and the OpenAI GPT-3 API to generate text based on the contents of the Google Drive folder. The application uses the Qdrant vector database to store and retrieve the vectors of the documents in the Google Drive folder.
+
+## Main Files
+### `main.py` - This file contains the FastAPI application that provides the RESTful API.
+- `index, '/'` - API call that check to make sure the google credentials are valid, the openAi api is accessible, and the qdrant database is accessible.
+- `load_docs_from_drive, '/load'` - API call that loads the contents of a Google Drive folder into the Qdrant database. Calls the `gdrive_downloader.py` file to download the contents of the Google Drive folder and the `qdrant.py` file to store the vectors of the documents in the Qdrant database.
+- `query_knowledge_base, '/query'` - API call that queries the Qdrant database to retrieve the vectors of the documents in the Google Drive folder and then uses the OpenAI GPT-3 API to generate text based on the contents of the Google Drive folder.
+### `qdrant.py` - This file contains the Qdrant client that is used to store and retrieve the vectors of the documents in the Google Drive folder.
+- Initializes the QdrantVectorStore class with the Qdrant database url and port. Contains some useful methods to store and retrieve vectors from the Qdrant database such as: 
+-- `setup_collection` - Creates a collection in the Qdrant vector collection. 
+-- `upsert_data` - Inserts or updates a vector in the Qdrant vector collection.
+-- `search` - Searches the Qdrant vector collection for the nearest vectors to a given vector.
+-- `search_with_filter` - Searches the Qdrant vector collection using the `search` method and then filters the results based on a given filter.
+-- `delete`, `delete_collection`, `get_collection`, `docs_to_chunks`, `chunk_tokens`
+
+### `gdrive_downloader.py` - This file contains the Google Drive client that is used to download the contents of a Google Drive folder in the form of a class that is called in the `main.py` file.
+- Initializes the GDriveDownloader class with the Google Drive folder id and the Google credentials file. Contains some useful methods to download the contents of a Google Drive folder such as:
+-- `initialize_service` - Initializes the Google Drive service with the Google credentials file.
+-- `download_folder` - Downloads a folder from the Google Drive folder.
+-- `download_file` - Downloads a file from the Google Drive folder.
+-- `list_files_in_folder` - Lists the files in a Google Drive folder.
+-- `download_pdf` - Downloads a pdf file from the Google Drive folder.
+-- `exctract_pdf_text` - Extracts text from a pdf file.
+
+### `.env-sample` - This file contains the environment variables that are used in the application. The file should be renamed to `.env` and the values should be filled in.
+
+### (must be created) `service_account.json` - This file contains the Google service account credentials that are used to access the Google Drive API. The file should be created by following the instructions in the "Setting up Google Drive access" section below. 
+
+### `home.html` - This file contains the html code for the home page of the application. Only actived when there is an error setting up the google credentials, openai api, or qdrant database.
+
+### `index.html` - This file contains the html code for the main application interface. Only actived when there are no errors. 
 
 ## Setting up Google Drive access
 The application requires a service account to be set up for Google to access the Google Drive resources. The instructions below assume you have access to the Google gcloud cli tools. Instructions on how to install are located https://cloud.google.com/sdk/docs/install

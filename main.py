@@ -68,10 +68,6 @@ def index():
     else:
         return render_template('index.html', answer=None)
 
-@app.route("/q",methods=['GET'])
-def query():
-     data = request.args
-     return data.get("param")
 
 
 @app.route("/load", methods=['POST'])
