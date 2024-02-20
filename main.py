@@ -64,7 +64,7 @@ def index():
     #qd server running(declare QD class and see if it errors)
     #if checks invalid send to home.html
     if not qdrant_server or not openai_cred or  not google_cred:
-       return render_template('home.html', answer=None, openai_api=openai_cred,google_drive_api=google_cred,qdrant_server=qdrant_server)
+       return render_template('error.html', answer=None, openai_api=openai_cred,google_drive_api=google_cred,qdrant_server=qdrant_server)
     else:
         return render_template('index.html', answer=None)
 
