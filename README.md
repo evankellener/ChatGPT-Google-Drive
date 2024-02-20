@@ -28,13 +28,17 @@ This is a simple application that uses the OpenAI GPT-3 model to generate text b
 -- `download_pdf` - Downloads a pdf file from the Google Drive folder.
 -- `exctract_pdf_text` - Extracts text from a pdf file.
 
-### `.env-sample` - This file contains the environment variables that are used in the application. The file should be renamed to `.env` and the values should be filled in.
+### `.env-sample` 
+- This file contains the environment variables that are used in the application. The file should be renamed to `.env` and the values should be filled in.
 
-### (must be created) `service_account.json` - This file contains the Google service account credentials that are used to access the Google Drive API. The file should be created by following the instructions in the "Setting up Google Drive access" section below. 
+### (must be created) `service_account.json` 
+- This file contains the Google service account credentials that are used to access the Google Drive API. The file should be created by following the instructions in the "Setting up Google Drive access" section below. 
 
-### `error.html` - This file contains the html code for the home page of the application. Only actived when there is an error setting up the google credentials, openai api, or qdrant database.
+### `error.html` 
+- This file contains the html code for the home page of the application. Only actived when there is an error setting up the google credentials, openai api, or qdrant database.
 
-### `index.html` - This file contains the html code for the main application interface. Only actived when there are no errors. 
+### `index.html` 
+- This file contains the html code for the main application interface. Only actived when there are no errors. 
 
 ## Setting up Google Drive access
 The application requires a service account to be set up for Google to access the Google Drive resources. The instructions below assume you have access to the Google gcloud cli tools. Instructions on how to install are located https://cloud.google.com/sdk/docs/install
